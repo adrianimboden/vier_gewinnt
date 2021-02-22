@@ -1,0 +1,25 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: docker build -t build_tmp .
+      - run: docker create -ti --name dummy build_tmp bash
+      - run: docker cp dummy:/src/build build
+      - run: docker rm -f dummy
+        
+      - uses: peaceiris/actions-gh-pages@v3  
+        with:
+          deploy_key: ${{ secrets.DEPLOY_KEY }}
+          external_repository: adrianimboden/vier-gewinnt-deploy 
+          publish_branch: master
+          publish_dir: build/
